@@ -266,22 +266,26 @@ public class LocalAuthPlugin implements MethodCallHandler, FlutterPlugin, Activi
 
   private ArrayList<String> getAvailableBiometrics() {
     ArrayList<String> biometrics = new ArrayList<>();
-    if (activity == null || activity.isFinishing()) {
+    if (activity == null || activity.isFinishing() || !hasBiometricHardware()) {
       return biometrics;
     }
-    PackageManager packageManager = activity.getPackageManager();
-    if (Build.VERSION.SDK_INT >= 23) {
-      if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
-        biometrics.add("fingerprint");
+    if (canAuthenticateWithBiometrics()) {
+      PackageManager packageManager = activity.getPackageManager();
+      if (Build.VERSION.SDK_INT >= 23) {
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+          biometrics.add("fingerprint");
+        }
       }
-    }
-    if (Build.VERSION.SDK_INT >= 29) {
-      if (packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
-        biometrics.add("face");
+      if (Build.VERSION.SDK_INT >= 29) {
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)) {
+          biometrics.add("face");
+        }
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
+          biometrics.add("iris");
+        }
       }
-      if (packageManager.hasSystemFeature(PackageManager.FEATURE_IRIS)) {
-        biometrics.add("iris");
-      }
+    } else {
+      biometrics.add("undefined");
     }
 
     return biometrics;
